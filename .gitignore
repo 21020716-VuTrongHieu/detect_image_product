@@ -1,0 +1,10 @@
+# virtual evn
+venv/
+
+.vscode/
+.env
+
+
+app/models_ai/weights/
+
+.DS_Store
