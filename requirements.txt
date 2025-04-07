@@ -44,7 +44,7 @@ ftfy==6.3.1
 gevent==24.11.1
 geventhttpclient==2.0.2
 greenlet==3.1.1
-groundingdino==0.1.0
+groundingdino @ git+https://github.com/IDEA-Research/GroundingDINO.git
 grpcio==1.71.0
 gunicorn==23.0.0
 h11==0.14.0
