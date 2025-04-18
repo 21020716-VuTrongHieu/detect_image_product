@@ -9,20 +9,22 @@ def find_similar_vectors(db: Session, vector, shop_id: int = None, limit: int = 
   if shop_id is not None:
     filters.append(f"shop_id = {shop_id}")
 
-  # if threshold is not None:
-  #   filters.append(f"vector <-> '{vector}' < {threshold}")
+  if threshold is not None:
+    filters.append(f"vector <=> '{vector}' < {threshold}")
 
   where_clause = f"WHERE {' AND '.join(filters)}" if filters else ""
 
   query = text(f"""
-    SELECT shop_id, product_id, variation_id,
-          vector <-> '{vector}' AS similarity
+    SELECT shop_id, product_id, variation_id, meta_data, phrase, logit,
+          vector <=> '{vector}' AS cosine_distance
     FROM shop_variation_vector
     {where_clause}
-    ORDER BY similarity
+    ORDER BY cosine_distance ASC
     LIMIT {limit};
   """)
 
   result = db.execute(query, {"vector": vector}).fetchall()
   return result
+
+
          

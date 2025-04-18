@@ -19,7 +19,7 @@ async def upload(request: Request):
   body = await request.json()
   return await file_controller.upload(body)
 
-@file_router.get("/find")
+@file_router.post("/find")
 async def find(request: Request):
   body = await request.json()
   return await file_controller.find(body)

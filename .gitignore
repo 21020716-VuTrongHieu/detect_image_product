@@ -4,6 +4,8 @@ venv/
 .vscode/
 .env
 
+__pycache__/
+*.pyc
 
 app/models_ai/weights/
 

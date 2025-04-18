@@ -3,6 +3,7 @@ from models import ShopVariationVector
 from app.database import get_db
 from sqlalchemy.orm import Session
 import numpy as np
+import torch
 
 def upload(obj):
 
@@ -14,6 +15,7 @@ def upload(obj):
   shop_id = obj.get("shop_id")
   variation_id = obj.get("variation_id")
   product_id = obj.get("product_id")
+  meta_data = obj.get("meta_data")
 
   boxes_pixel, logits, phrases, features = process_image(file_path, phrase, True)
 
@@ -24,27 +26,20 @@ def upload(obj):
 
   if len(features) == 0:
     return None
-  
-  existing_records = db.query(ShopVariationVector).filter(
-    ShopVariationVector.shop_id == shop_id,
-    ShopVariationVector.variation_id == variation_id,
-    ShopVariationVector.product_id == product_id
-  ).all()
-  if existing_records:
-    print("🔹 Found existing records, deleting...")
-    for record in existing_records:
-      db.delete(record)
-    db.commit()
-    print("🔹 Deleted existing records.")
 
   for i in range(len(features)):
-    vector = features[i].tolist() if hasattr(features[i], 'tolist') else features[i]
-    logit = logits[i].tolist() if hasattr(logits[i], 'tolist') else logits[i]
-    bounding_box = boxes_pixel[i].tolist() if hasattr(boxes_pixel[i], 'tolist') else boxes_pixel[i]
+    # Chuyển tensor thành list nếu là tensor, nếu không thì giữ nguyên danh sách
+    vector = features[i].cpu().numpy().tolist() if isinstance(features[i], torch.Tensor) else features[i]
+    # Các đối tượng khác (logit, bounding_box, ...) không cần thay đổi
+    logit = logits[i].cpu().numpy().tolist() if isinstance(logits[i], torch.Tensor) else logits[i]
+    bounding_box = boxes_pixel[i].cpu().numpy().tolist() if isinstance(boxes_pixel[i], torch.Tensor) else boxes_pixel[i]
     phrase = phrases[i]
 
     # Đảm bảo vector có dạng numpy array và đúng chiều
-    vector = np.array(vector).tolist()
+    # vector = np.array(vector).tolist()
+    # vector_2 = np.array(vector_2).tolist()
+
+    print("🔹 Vector:", vector)
     shop_variation_vector = ShopVariationVector(
       product_id=product_id,
       variation_id=variation_id,
@@ -52,7 +47,8 @@ def upload(obj):
       vector=vector,
       logit=logit,
       phrase=phrase,
-      bounding_box=bounding_box
+      bounding_box=bounding_box,
+      meta_data=meta_data
     )
     db.add(shop_variation_vector)
   db.commit()

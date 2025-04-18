@@ -4,6 +4,8 @@ import pika
 import logging
 import threading
 from app.workers.main_worker import assign_job
+from dotenv import load_dotenv
+load_dotenv()
 
 RABBITMQ_HOST = os.getenv("R_HOST", "localhost")
 RABBITMQ_USER = os.getenv("R_USERNAME", "guest")

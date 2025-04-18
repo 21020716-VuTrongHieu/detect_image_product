@@ -28,7 +28,7 @@ run-dev:
 	uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 	
 run: venv
-	PYTHONPATH=. $(GUNICORN) -w ${COUNT_NODE_WORKERS} -k uvicorn.workers.UvicornWorker --reload app.main:app
+	PYTHONPATH=. $(GUNICORN) -w ${COUNT_NODE_WORKERS} -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 app.main:app
 
 # Chạy ứng dụng bằng Docker
 docker-build:

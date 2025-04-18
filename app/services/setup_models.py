@@ -1,5 +1,10 @@
 import os
 import concurrent.futures
+import torch
+from app.models_ai.grounding_dino import GroundingDino
+from app.models_ai.clip import Clip
+from app.models_ai.dinov2 import DinoV2
+
 
 def download_model(model_name, model_info):
 	weight_path = model_info["path"]
@@ -11,6 +16,16 @@ def download_model(model_name, model_info):
 		print(f"{model_name} downloaded successfully.")
 	else:
 		print(f"{model_name} already exists.")
+        
+def download_dinov2_model(dinov2_model_path):
+  if not os.path.exists(dinov2_model_path):
+    print(f"Downloading DINOv2 model...")
+    # Tải mô hình DINOv2 từ PyTorch Hub
+    model = torch.hub.load('facebookresearch/dinov2', 'dinov2_vitg14')
+    torch.save(model.state_dict(), dinov2_model_path)  # Lưu lại mô hình sau khi tải xong
+    print("DINOv2 model downloaded and saved successfully.")
+  else:
+    print(f"DINOv2 model already exists at {dinov2_model_path}")
 
 def ensure_models():
   HOME = os.path.dirname(os.path.abspath(__file__))
@@ -39,6 +54,14 @@ def ensure_models():
         future.result()
       except Exception as e:
         print(f"Error downloading {model_name}: {e}")
+  
+  # download_dinov2_model(os.path.join(WEIGHTS_FOLDER, "dinov2_vitg14_pretrain.pth"))
+  # 🔥 Instantiate models to warm them up
+  GroundingDino.get_instance()
+  Clip.get_instance()
+  # DinoV2.get_instance()
+
+  print("✅ All models are downloaded and loaded into memory.")
 
 if __name__ == "__main__":
   ensure_models()

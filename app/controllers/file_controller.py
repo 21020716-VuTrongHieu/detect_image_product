@@ -2,11 +2,9 @@ from app.consumers.rabbitmq_publisher import enqueue
 from app.services.inference import process_image
 from app.database import get_db
 from sqlalchemy.orm import Session
-from sqlalchemy import func
-from models import ShopVariationVector
 import numpy as np
-from pgvector.sqlalchemy import Vector
 from app.crud.shop_variation_vector import find_similar_vectors
+from collections import defaultdict
 
 async def upload(body):
   """
@@ -14,7 +12,6 @@ async def upload(body):
   """
 
   data = body.get("data", [])
-  phrase = body.get("phrase", "object")
 
   if not data:
     return {"success": False, "message": "No data provided"}
@@ -27,6 +24,8 @@ async def upload(body):
         shop_id = item.get("shop_id")
         variation_id = item.get("variation_id")
         product_id = item.get("product_id")
+        meta_data = item.get("meta_data")
+        phrase = item.get("phrase", "clothing")
         if not file_paths or not isinstance(file_paths, list):
           continue
         else:
@@ -41,7 +40,8 @@ async def upload(body):
                   "phrase": phrase,
                   "shop_id": shop_id,
                   "variation_id": variation_id,
-                  "product_id": product_id
+                  "product_id": product_id,
+                  "meta_data": meta_data
                 }
               }
               enqueue("task_pool", task)
@@ -53,45 +53,86 @@ async def find(body):
   """
   url = body.get("url")
   prompt = body.get("prompt")
+  shop_id = body.get("shop_id")
   if not url or not isinstance(url, str):
     return {"success": False, "message": "Invalid URL"}
   else:
-    boxes_pixel, logits, phrases, features = process_image(url, prompt, False)
+    boxes_pixel, logits, phrases, features = process_image(url, prompt, True)
     if len(features) == 0:
       return {"success": False, "message": "No features found"}
     
     db: Session = next(get_db())
-    closest_records = []
-    closest_map = {}
-
     print(f"phrases: {phrases}")
     print(f"logits: {logits}")
 
+    all_records = []
     
 
-    for feature in features:
+    for i, feature in enumerate(features):
       vector_data = np.array(feature)
       vector_to_compare_list = vector_data.tolist()
 
-      # Find similar vectors in the database
       results = find_similar_vectors(
         db=db,
-        vector=vector_to_compare_list
+        vector=vector_to_compare_list,
+        shop_id=shop_id,
+        limit=1000,
+        threshold=0.26
       )
 
-      if results:
-        for shop_id, product_id, variation_id, distance in results:
-          key = (shop_id, product_id, variation_id)
-          if key not in closest_map or distance < closest_map[key]["distance"]:
-            closest_map[key] = {
-              "shop_id": shop_id,
-              "product_id": product_id,
-              "variation_id": variation_id,
-              "distance": distance
-            }
+      phrase = phrases[i]
+      logit = logits[i]
 
-    closest_records = list(closest_map.values())
-    # Sort the closest records by distance
-    closest_records.sort(key=lambda x: x["distance"])
+      for res in results:
+        shop_id_r, product_id, variation_id, meta_data, _, _, distance = res
+        print(f"variation_id: {variation_id}, distance: {distance}")
+        all_records.append({
+          "shop_id": shop_id_r,
+          "product_id": product_id,
+          "variation_id": variation_id,
+          "meta_data": meta_data,
+          "phrase": phrase,
+          "logit": logit,
+          "distance": distance
+        })
 
-    return {"success": True, "data": closest_records}
+    best_variation_map = {}
+    for record in all_records:
+      key = (record["shop_id"], record["product_id"], record["variation_id"])
+      if key not in best_variation_map or record["distance"] < best_variation_map[key]["distance"]:
+        best_variation_map[key] = record
+
+    grouped_results = defaultdict(list)
+
+    temp_product_grouping = defaultdict(list)
+
+    for record in best_variation_map.values():
+      phrase = record["phrase"]
+      group_key = (record["shop_id"], record["product_id"], phrase, record["distance"])
+      temp_product_grouping[group_key].append(record)
+
+    for group_key, records in temp_product_grouping.items():
+      shop_id, product_id, phrase, distance = group_key
+      if len(records) == 1:
+        grouped_results[phrase].append(records[0])
+      else:
+        merged = {
+          "shop_id": shop_id,
+          "product_id": product_id,
+          "meta_data": records[0]["meta_data"],
+          "phrase": phrase,
+          "logit": max(r["logit"] for r in records),
+          "distance": distance,
+          "variation_ids": [r["variation_id"] for r in records]
+        }
+        grouped_results[phrase].append(merged)
+
+    final_results = []
+    for phrase, records in grouped_results.items():
+      records.sort(key=lambda x: x["distance"])
+      top_2 = records[:2]
+      final_results.extend(top_2)
+
+    final_results.sort(key=lambda x: x["distance"])
+
+    return {"success": True, "data": final_results}

@@ -1,12 +1,14 @@
 import os
 from app.models_ai.grounding_dino import GroundingDino
 from app.models_ai.clip import Clip
+from app.models_ai.dinov2 import DinoV2
 from datetime import datetime
 
 def process_image(image_path, text_prompt, is_import_data=False):
   # Get instances of the models
   grounding_dino = GroundingDino.get_instance()
   clip = Clip.get_instance()
+  # dinov2 = DinoV2.get_instance()
 
   # Detect objects using GroundingDino
   boxes_pixel, logits, phrases, cropped_images = grounding_dino.detect_objects(image_path, text_prompt, is_import_data)
@@ -15,6 +17,7 @@ def process_image(image_path, text_prompt, is_import_data=False):
     return boxes_pixel, logits, phrases, []
   
   features = clip.extract_features(cropped_images)
+  # features_2 = dinov2.extract_features(cropped_images)
 
   # print("🔹 phrases:", phrases)
 

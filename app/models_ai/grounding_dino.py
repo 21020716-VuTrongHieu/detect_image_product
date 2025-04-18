@@ -4,20 +4,38 @@ from io import BytesIO
 import torch
 import groundingdino
 from groundingdino.util.inference import load_model, predict, load_image
-from PIL import Image
+from PIL import Image, ImageEnhance
 import numpy as np
 from collections import defaultdict
 
+def prepare_image_for_grounding_dino(url):
+  response = requests.get(url)
+  img = Image.open(BytesIO(response.content))
 
+  # Convert sang RGB để loại bỏ alpha
+  img = img.convert("RGB")
+
+  # Resize để đồng bộ
+  img = img.resize((1024, int(1024 * img.height / img.width)))
+
+  # Tăng độ tương phản nhẹ
+  contrast = ImageEnhance.Contrast(img)
+  img = contrast.enhance(1.2)
+
+  # Tăng độ sắc nét
+  sharpness = ImageEnhance.Sharpness(img)
+  img = sharpness.enhance(1.3)
+
+  return img
 
 class GroundingDino:
   _instance = None
 
   BOX_THRESHOLD_IMPORT = 0.3
-  TEXT_THRESHOLD_IMPORT = 0.25
-  BOX_THRESHOLD_EXPORT = 0.2
-  TEXT_THRESHOLD_EXPORT = 0.15
-  TOP_K = 5
+  TEXT_THRESHOLD_IMPORT = 0.3
+  BOX_THRESHOLD_EXPORT = 0.3
+  TEXT_THRESHOLD_EXPORT = 0.3
+  TOP_K = 1
 
   @staticmethod
   def get_instance():
@@ -41,6 +59,7 @@ class GroundingDino:
 
     model = load_model(GROUNDINGDINO_CONFIG_PATH, GROUNDINGDINO_WEIGHTS_PATH)
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"decive {device}")
     self.model = model
     self.device = device
     self.model.eval()
@@ -51,25 +70,26 @@ class GroundingDino:
       if image_path.startswith("http"):
         response = requests.get(image_path, timeout=10)
         response.raise_for_status()
-        image_source = Image.open(BytesIO(response.content)).convert("RGB")
+        image_source = prepare_image_for_grounding_dino(image_path)
         image_source = np.array(image_source)
         image = torch.tensor(image_source, dtype=torch.float32).permute(2, 0, 1) / 255.0
-        image = (image - 0.485) / 0.229
+        image = (image - torch.tensor([0.485, 0.456, 0.406])[:, None, None]) / torch.tensor([0.229, 0.224, 0.225])[:, None, None]
       else:
         image_source, image = load_image(image_path)
     except Exception as e:
       print(f"Error loading image: {e}")
       return None, None, None, []
 
-    if is_import_data:
-      text_prompt_list = [prompt.strip() for prompt in text_prompts.split(",")]
-    else:
-      text_prompt_list = [text_prompts.strip()]
+    # if is_import_data:
+    text_prompt_list = [prompt.strip() for prompt in text_prompts.split(",")]
+    # else:
+    #   text_prompt_list = [text_prompts.strip()]
 
     results = []
     H, W, _ = image_source.shape
 
     for prompt in text_prompt_list:
+      print(f"prompt: {prompt}")
       boxes, logits, phrases = predict(
         model=self.model,
         image=image,
@@ -79,6 +99,7 @@ class GroundingDino:
         device=self.device
       )
       print(f"🔹 phrases: {phrases}")
+      print(f"🔹 logits: {logits}")
 
       if len(boxes) == 0 or len(logits) == 0 or len(phrases) == 0:
         continue

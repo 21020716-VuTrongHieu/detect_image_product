@@ -1,6 +1,16 @@
 import os
 import torch
 import clip
+from PIL import Image
+
+def pad_to_square(image, background_color=(255, 255, 255)):
+  w, h = image.size
+  if w == h:
+      return image
+  size = max(w, h)
+  new_img = Image.new("RGB", (size, size), background_color)
+  new_img.paste(image, ((size - w) // 2, (size - h) // 2))
+  return new_img
 
 class Clip:
   _instance = None
@@ -33,6 +43,7 @@ class Clip:
     features = []
     for image in images:
       if not isinstance(image, torch.Tensor):
+        image = pad_to_square(image)
         image = self.preprocess(image).unsqueeze(0)
       image = image.to(self.device)
       with torch.no_grad():
