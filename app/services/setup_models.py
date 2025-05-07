@@ -3,7 +3,6 @@ import concurrent.futures
 import torch
 from app.models_ai.grounding_dino import GroundingDino
 from app.models_ai.clip import Clip
-from app.models_ai.dinov2 import DinoV2
 
 
 def download_model(model_name, model_info):
