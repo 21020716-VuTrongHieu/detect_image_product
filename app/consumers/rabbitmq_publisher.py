@@ -131,4 +131,5 @@ class RabbitMQPublisher:
 rabbitmq_publisher = RabbitMQPublisher()
 
 def enqueue(queue, payload):
+  # message = json.dumps(payload)
   rabbitmq_publisher.publish_message(queue, payload)
