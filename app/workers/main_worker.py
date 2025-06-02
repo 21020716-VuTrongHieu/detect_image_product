@@ -2,7 +2,7 @@ import json
 import uuid
 import logging
 from datetime import datetime
-from app.workers import user_worker, file_worker
+from app.workers import variation_worker, user_worker
 
 def assign_job(chan, tag, payload):
   task_id = str(uuid.uuid4())
@@ -16,7 +16,11 @@ def assign_job(chan, tag, payload):
       case "test":
         user_worker.test(payload)
       case "upload":
-        file_worker.upload(payload)
+        variation_worker.upload(payload)
+      case "statistic_upload":
+        variation_worker.statistic_upload(payload)
+      case "update_status_callback":
+        variation_worker.update_status_callback(payload)
       case _:
         logging.warning(f"Unknown action: {obj['action']}")
 

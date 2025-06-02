@@ -1,4 +1,4 @@
-from sqlalchemy import Column, TIMESTAMP, Index, ForeignKey, PrimaryKeyConstraint, Integer
+from sqlalchemy import Column, TIMESTAMP, Index, ForeignKey, PrimaryKeyConstraint, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from .base import Base
@@ -6,7 +6,7 @@ from .base import Base
 class VariationRegions(Base):
   __tablename__ = 'variation_regions'
 
-  shop_id = Column(Integer, nullable=False, index=True)
+  page_shop_id = Column(String, nullable=False, index=True)
   variation_data_id = Column(
     UUID(as_uuid=True),
     ForeignKey('variation_data.id', ondelete='CASCADE'),
@@ -25,14 +25,15 @@ class VariationRegions(Base):
 
   __table_args__ = (
     PrimaryKeyConstraint(
+      'page_shop_id',
       'variation_data_id',
       'region_id',
-      name='pk_variation_regions'
+      name='pk_page_variation_region'
     ),
     Index('idx_variation_region', 'region_id', 'variation_data_id'),
-    Index('idx_variation_region_shop', 'shop_id', 'region_id', 'variation_data_id'),
-    Index('idx_variation_region_shop_variation', 'shop_id', 'variation_data_id'),
-    Index('idx_variation_region_shop_region', 'shop_id', 'region_id')
+    Index('idx_variation_region_page', 'page_shop_id', 'region_id', 'variation_data_id'),
+    Index('idx_variation_region_page_variation', 'page_shop_id', 'variation_data_id'),
+    Index('idx_variation_region_page_region', 'page_shop_id', 'region_id')
   )
 
   def __repr__(self):

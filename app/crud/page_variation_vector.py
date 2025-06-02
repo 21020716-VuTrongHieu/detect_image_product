@@ -1,20 +1,23 @@
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-def find_similar_vectors(db: Session, vector, shop_id: int = None, limit: int = 10, threshold: float = 0.5):
+def find_similar_vectors(db: Session, vector, page_id: str = None, shop_id: str = None, limit: int = 10, threshold: float = 0.5):
   """
   Find similar vectors in the database.
   # """
   filters = []
-  if shop_id is not None:
-    filters.append(f"vd.shop_id = {shop_id}")
+  if page_id is not None:
+    if shop_id:
+      filters.append(f"(vd.page_shop_id = '{page_id}' OR vd.page_shop_id = '{shop_id}')")
+    else:
+      filters.append(f"vd.page_shop_id = '{page_id}'")
   if threshold is not None:
     filters.append(f"r.vector <=> '{vector}' < {threshold}")
 
   where_clause = f"WHERE {' AND '.join(filters)}" if filters else ""
   query = text(f"""
     SELECT
-      vd.shop_id,
+      vd.page_shop_id,
       vd.product_id,
       vd.variation_id,
       vd.meta_data,
@@ -28,9 +31,6 @@ def find_similar_vectors(db: Session, vector, shop_id: int = None, limit: int = 
   """)
 
   result = db.execute(query, {
-    "vector": vector,
-    "shop_id": shop_id,
-    "threshold": threshold,
     "limit": limit
   }).fetchall()
   return result

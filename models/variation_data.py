@@ -8,7 +8,7 @@ class VariationData(Base):
   __tablename__ = 'variation_data'
 
   id = Column(UUID, primary_key=True, default=uuid.uuid4)
-  shop_id = Column(Integer, nullable=False, index=True)
+  page_shop_id = Column(String, nullable=False, index=True)
   product_id = Column(String, nullable=False, index=True)
   variation_id = Column(String, nullable=False, index=True)
   meta_data = Column(JSONB, nullable=True)
@@ -17,12 +17,12 @@ class VariationData(Base):
   updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
   __table_args__ = (
-    Index('idx_shop_product', 'shop_id', 'product_id'),
-    Index('idx_shop_variation', 'shop_id', 'variation_id'),
+    Index('idx_page_product', 'page_shop_id', 'product_id'),
+    Index('idx_page_variation', 'page_shop_id', 'variation_id'),
     Index('idx_product_variation', 'product_id', 'variation_id'),
-    Index('idx_shop_product_variation', 'shop_id', 'product_id', 'variation_id'),
-    UniqueConstraint('shop_id', 'product_id', 'variation_id', name='uq_variation_data_shop_product_variation'),
+    Index('idx_page_product_variation', 'page_shop_id', 'product_id', 'variation_id'),
+    UniqueConstraint('page_shop_id', 'product_id', 'variation_id', name='uq_variation_data_page_product_variation'),
   )
 
   def __repr__(self):
-    return f"<VariationData(id={self.id}, shop_id={self.shop_id}, product_id={self.product_id}, variation_id={self.variation_id})>"
+    return f"<VariationData(id={self.id}, page_shop_id={self.page_shop_id}, product_id={self.product_id}, variation_id={self.variation_id})>"

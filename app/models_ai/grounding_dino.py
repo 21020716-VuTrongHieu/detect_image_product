@@ -11,7 +11,7 @@ from itertools import chain
 
 def prepare_image_for_grounding_dino(url):
   try:
-    response = requests.get(url, timeout=5)
+    response = requests.get(url, timeout=10)
     response.raise_for_status()
     img = Image.open(BytesIO(response.content)).convert("RGB")
   except Exception as e:

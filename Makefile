@@ -6,7 +6,8 @@ VENV=venv
 PYTHON=$(VENV)/bin/python
 PIP=$(VENV)/bin/pip
 GUNICORN=$(VENV)/bin/gunicorn
-COUNT_NODE_WORKERS=1
+COUNT_NODE_WORKERS=4
+COUNT_THREADS=8
 
 # Tạo virtualenv & cài đặt thư viện
 venv:
@@ -28,7 +29,7 @@ run-dev:
 	uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 	
 run: venv
-	PYTHONPATH=. $(GUNICORN) -w ${COUNT_NODE_WORKERS} -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 app.main:app
+	PYTHONPATH=. $(GUNICORN) -w ${COUNT_NODE_WORKERS} --threads ${COUNT_THREADS} -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 app.main:app
 
 # Chạy ứng dụng bằng Docker
 docker-build:

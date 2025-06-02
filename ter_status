@@ -1,0 +1,27 @@
+[0;1;32m●[0m rabbitmq-server.service - RabbitMQ broker
+     Loaded: loaded (/lib/systemd/system/rabbitmq-server.service; enabled; vendor preset: enabled)
+     Active: [0;1;32mactive (running)[0m since Tue 2025-04-08 16:41:30 UTC; 1 month 10 days ago
+   Main PID: 1024 (beam.smp)
+      Tasks: 49 (limit: 56301)
+     Memory: 158.4M
+        CPU: 2h 57min 28.278s
+     CGroup: /system.slice/rabbitmq-server.service
+             ├─1024 /usr/lib/erlang/erts-15.2.5/bin/beam.smp -W w -MBas ageffcbf -MHas ageffcbf -MBlmbcs 512 -MHlmbcs 512 -MMmcs 30 -pc unicode -P 1048576 -t 5000000 -stbt db -zdbbl 128000 -sbwt none -sbwtdcpu none -sbwtdio none -- -root /usr/lib/erlang -bindir /usr/lib/erlang/erts-15.2.5/bin -progname erl -- -home /var/lib/rabbitmq -- -pa "" -noshell -noinput -s rabbit boot -boot start_sasl -syslog logger "[]" -syslog syslog_error_logger false -kernel prevent_overlapping_partitions false --
+             ├─1114 erl_child_setup 32768
+             ├─1270 sh -s disksup
+             ├─1272 /usr/lib/erlang/lib/os_mon-2.10.1/priv/bin/memsup
+             ├─1273 /usr/lib/erlang/lib/os_mon-2.10.1/priv/bin/cpu_sup
+             ├─1274 /usr/lib/erlang/erts-15.2.5/bin/inet_gethost 4
+             ├─1275 /usr/lib/erlang/erts-15.2.5/bin/inet_gethost 4
+             └─1301 /bin/sh -s rabbit_disk_monitor
+
+Apr 08 16:41:30 Pancake rabbitmq-server[1024]:   Doc guides:  https://www.rabbitmq.com/docs
+Apr 08 16:41:30 Pancake rabbitmq-server[1024]:   Support:     https://www.rabbitmq.com/docs/contact
+Apr 08 16:41:30 Pancake rabbitmq-server[1024]:   Tutorials:   https://www.rabbitmq.com/tutorials
+Apr 08 16:41:30 Pancake rabbitmq-server[1024]:   Monitoring:  https://www.rabbitmq.com/docs/monitoring
+Apr 08 16:41:30 Pancake rabbitmq-server[1024]:   Upgrading:   https://www.rabbitmq.com/docs/upgrade
+Apr 08 16:41:30 Pancake rabbitmq-server[1024]:   Logs: /var/log/rabbitmq/rabbit@Pancake.log
+Apr 08 16:41:30 Pancake rabbitmq-server[1024]:         <stdout>
+Apr 08 16:41:30 Pancake rabbitmq-server[1024]:   Config file(s): (none)
+Apr 08 16:41:30 Pancake rabbitmq-server[1024]:   Starting broker... completed with 0 plugins.
+Apr 08 16:41:30 Pancake systemd[1]: Started RabbitMQ broker.

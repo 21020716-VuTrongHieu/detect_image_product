@@ -7,10 +7,45 @@ from typing import List, Union
 
 def predict_product_category(image_path):
   main_categories = {
-    "clothing": ["dress", "shirt", "pants", "shoes", "hat", "socks", "jacket", "sweater", "shorts", "skirt"],
-    "cosmetic": ["lipstick", "foundation", "eyeshadow", "blush", "mascara", "nail polish", "perfume", "skincare", "hair care"],
-    "electronics": ["phone", "laptop", "tablet", "camera", "headphones", "smartwatch", "television", "speaker", "charger"],
-    "furniture": ["sofa", "table", "chair", "bed", "desk", "shelf", "cabinet", "lamp", "rug"],
+    "clothing": [
+      "dress", "shirt", "t-shirt", "blouse", "pants", "jeans", "shorts", "skirt", "jacket", "coat", "sweater", "hoodie","shoes", "sandals", "boots", "sneakers", "hat", "cap", "socks", "underwear", "bra", "scarf", "belt", "gloves"
+    ],
+    "cosmetic": [
+      "lipstick", "eyeshadow", "blush", "mascara", "eyeliner", "foundation", "nail polish", "perfume", "facial cleanser", "moisturizer", "sunscreen", "toner", "serum", "face mask", "shampoo", "conditioner", "hair oil"
+    ],
+    "electronics": [
+      "smartphone", "laptop", "tablet", "camera", "headphones", "earbuds", "smartwatch", "television", "monitor", "mouse", "keyboard", "speaker", "router", "charger", "power bank", "gamepad", "e-reader", "drone"
+    ],
+    "furniture": [
+      "sofa", "table", "chair", "bed", "desk", "bookshelf", "cabinet", "wardrobe", "lamp", "rug", "mirror", "shoe rack", "tv stand"
+    ],
+    "home_appliances": [
+      "fan", "air conditioner", "refrigerator", "microwave", "rice cooker", "electric kettle", "blender", "vacuum cleaner", "washing machine", "hair dryer", "iron", "water heater"
+    ],
+    "toys": [
+      "doll", "lego", "stuffed animal", "puzzle", "board game", "action figure", "rc car", "building blocks", "playdough"
+    ],
+    "baby_products": [
+      "diapers", "baby bottle", "pacifier", "baby stroller", "crib", "baby clothes", "baby shampoo", "baby wipes", "baby toy"
+    ],
+    "sports": [
+      "bicycle", "treadmill", "dumbbell", "yoga mat", "helmet", "basketball", "football", "tennis racket", "swimsuit", "sports shoes", "gym bag"
+    ],
+    "automotive": [
+      "motor oil", "car vacuum", "car charger", "dashboard camera", "car seat", "helmet", "motorcycle gloves", "car tire", "car cover"
+    ],
+    "groceries": [
+      "instant noodles", "rice", "coffee", "tea", "snacks", "chocolate", "cereal", "milk", "canned food", "cooking oil", "condiments", "bottle water"
+    ],
+    "stationery": [
+      "notebook", "pen", "pencil", "eraser", "ruler", "highlighter", "stapler", "paper", "binder", "scissors", "glue", "tape"
+    ],
+    "pet_supplies": [
+      "pet food", "dog leash", "cat litter", "pet bed", "pet toy", "pet shampoo", "pet carrier", "feeding bowl", "scratch post"
+    ],
+    "accessories": [
+      "backpack", "handbag", "wallet", "watch", "sunglasses", "necklace", "ring", "bracelet", "earrings", "keychain", "hat", "cap"
+    ]
   }
 
   try:

@@ -75,12 +75,14 @@ import pika
 import json
 import logging
 import threading
+from dotenv import load_dotenv
+load_dotenv()
 
-RABBITMQ_HOST = os.getenv("R_HOST", "localhost")
-RABBITMQ_USER = os.getenv("R_USERNAME", "guest")
-RABBITMQ_PASSWORD = os.getenv("R_PASSWORD", "guest")
-RABBITMQ_PORT = int(os.getenv("R_PORT", 5672))
-RABBITMQ_VHOST = os.getenv("R_VHOST", "/")
+RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
+RABBITMQ_USER = os.getenv("RABBITMQ_USER", "guest")
+RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD", "guest")
+RABBITMQ_PORT = int(os.getenv("RABBITMQ_PORT", 5672))
+RABBITMQ_VHOST = os.getenv("RABBITMQ_VHOST", "/")
 
 
 class RabbitMQPublisher:
